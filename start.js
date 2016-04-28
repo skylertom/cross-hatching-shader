@@ -2,6 +2,12 @@ var gl;
 var shaderProgram;
 var vertexPositionBuffer, vertexIndexBuffer, vertexNormalBuffer;
 var textureLoaded = false;
+var xLightPos = 0;
+var yLightPos = 0;
+var zLightPos = 0;
+var stop = true;
+var rotate = 0.0;
+var rotateX = 0.0;
 
 function initGL(canvas) {
 try {

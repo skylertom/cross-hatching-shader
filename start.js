@@ -12,6 +12,9 @@ var rotateX = 0.0;
 var numTextures = 6;
 var texturesLoaded = [];
 
+/* test */
+var sampleIndex = 0;
+
 function initGL(canvas) {
     try {
         gl = canvas.getContext("webgl");
@@ -340,8 +343,9 @@ function drawScene() {
         	gl.activeTexture(gl.TEXTURE0 + i);
             gl.bindTexture(gl.TEXTURE_2D, myTextures[i]);
         }
-        shaderProgram.samplerUniform = gl.getUniformLocation(shaderProgram, "uSampler");
-        gl.uniform1i(shaderProgram.samplerUniform, 5);
+
+        shaderProgram.samplerUniform = gl.getUniformLocation(shaderProgram, "uSampler[0]");
+        gl.uniform1iv(shaderProgram.samplerUniform, [0,1,2,3,4,5]);
 
 
         gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, vertexIndexBuffer);
@@ -388,4 +392,9 @@ function mouseMove(event) {
     y = y * -1;
     var mouseLocation = gl.getUniformLocation(shaderProgram, "mouseLocation");
     gl.uniform2f(mouseLocation, x, y)
+}
+
+function mouseClick(event) {
+    var sampleLoc = gl.getUniformLocation(shaderProgram, "sampleIndex");
+    gl.uniform1i(sampleLoc, (sampleIndex++)%myTextures.length);
 }

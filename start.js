@@ -1,6 +1,7 @@
 var gl;
 var shaderProgram;
 var vertexPositionBuffer, vertexIndexBuffer, vertexNormalBuffer;
+var myTextures = [];
 var textureLoaded = false;
 var xLightPos = 0;
 var yLightPos = 0;
@@ -8,6 +9,8 @@ var zLightPos = 0;
 var stop = true;
 var rotate = 0.0;
 var rotateX = 0.0;
+var numTextures = 6;
+var texturesLoaded = [];
 
 function initGL(canvas) {
     try {
@@ -206,20 +209,36 @@ function initBuffers() {
 
 }
 
-function initTexture() {
-    myTexture = gl.createTexture();
-    myTexture.image = new Image();
-    myTexture.image.onload = function () {
-        gl.bindTexture(gl.TEXTURE_2D, myTexture);
-        gl.pixelStorei(gl.UNPACK_FLIP_Y_WEBGL, true);  //this line flips the texture image upside down
-            gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE, myTexture.image);
-            gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.NEAREST);
-            gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.NEAREST);
-            gl.bindTexture(gl.TEXTURE_2D, null);
-
-        textureLoaded = true;
+function onImageLoad() {
+    if (texturesLoaded.length == 0) {
+        console.log("Error already loaded all images");
+        return;
     }
-    myTexture.image.src = "jumbo.gif";
+    var index = texturesLoaded.pop();
+    gl.bindTexture(gl.TEXTURE_2D, myTextures[index]);
+    gl.pixelStorei(gl.UNPACK_FLIP_Y_WEBGL, true);  //this line flips the texture image upside down
+    gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE, myTextures[index].image);
+    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.NEAREST);
+    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.NEAREST);
+    gl.bindTexture(gl.TEXTURE_2D, null);
+}
+
+function initTexture() {
+    for (var i = 0; i < numTextures; i++) {
+        myTextures.push(gl.createTexture());
+        myTextures[i].image = new Image();
+        /* problem with asynchronous calls to this
+         * I added indices to a queue (texturesLoaded) and
+            go through the queue adding the images to my list
+            if we try to pass an integer directly to it, it will
+            overwrite that every time with the last integer
+         */
+        myTextures[i].image.onload = function(i) { onImageLoad(); }
+        texturesLoaded.unshift(i);
+        var x = i + 1;
+        myTextures[i].image.src = "images/shading/" + x + ".gif";
+    }
+    textureLoaded = true;
 }
 
 function pushMatrix(perspectiveMatrix, modelviewMatrix) {
@@ -230,7 +249,7 @@ function pushMatrix(perspectiveMatrix, modelviewMatrix) {
 }
 
 function popMatrix(perspectiveMatrix, modelviewMatrix) {
-    if (stack.size < 2) {
+    if (stack.length < 2) {
         console.log("Trying to pop when less than 2 elements on stack");
         return;
     }
@@ -268,11 +287,6 @@ function drawLightSource(perspectiveMatrix, modelviewMatrix){
 
         shaderProgram.colorUniform = gl.getUniformLocation(shaderProgram, "color");
         gl.uniform3f(shaderProgram.colorUniform, 1.0, 1.0, 0);
-
-    	gl.activeTexture(gl.TEXTURE0);
-        gl.bindTexture(gl.TEXTURE_2D, myTexture);
-        shaderProgram.samplerUniform = gl.getUniformLocation(shaderProgram, "uSampler");
-        gl.uniform1i(shaderProgram.samplerUniform, 0);
 
         // right now draw mini yellow bunny instead of dealing with the sphere
         gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, vertexIndexBuffer);
@@ -321,10 +335,14 @@ function drawScene() {
         modelviewMatrix = mat4.clone(changing);
         shaderProgram.mvMatrixUniform = gl.getUniformLocation(shaderProgram, "uMVMatrix");
         gl.uniformMatrix4fv(shaderProgram.mvMatrixUniform, false, changing);
-    	gl.activeTexture(gl.TEXTURE0);
-        gl.bindTexture(gl.TEXTURE_2D, myTexture);
+
+        for (var i = 0; i < myTextures.length; i++) {
+        	gl.activeTexture(gl.TEXTURE0 + i);
+            gl.bindTexture(gl.TEXTURE_2D, myTextures[i]);
+        }
         shaderProgram.samplerUniform = gl.getUniformLocation(shaderProgram, "uSampler");
-        gl.uniform1i(shaderProgram.samplerUniform, 0);
+        gl.uniform1i(shaderProgram.samplerUniform, 5);
+
 
         gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, vertexIndexBuffer);
         gl.drawElements(gl.TRIANGLES, vertexIndexBuffer.numItems, gl.UNSIGNED_SHORT, 0);
@@ -341,12 +359,12 @@ function webGLStart() {
     var canvas = document.getElementById("myCanvas");
     initGL(canvas);
     initShaders();
-    initTexture();
 
+    initTexture();
     var canvasSize = gl.getUniformLocation(shaderProgram, "canvasSize");
     gl.uniform2f(canvasSize, canvas.width, canvas.height);
 
-    parse("bunny.ply", myVertexList, myFaceList);
+    parse("images/bunny.ply", myVertexList, myFaceList);
 //initBuffers() would normally be called here, but it's now called from within
 // parse() because of the asynchronous nature of javascript file loading
 //initBuffers();
@@ -357,3 +375,17 @@ function webGLStart() {
 
     animateMyScene();
 };
+
+function mouseMove(event) {
+    var x = event.clientX;
+    var y = event.clientY;
+
+	var canvas = document.getElementById("myCanvas");
+    x = x / canvas.width;
+    y = y / canvas.height;
+    x = 2.0 * (x - .5);
+    y = 2.0 * (y - .5);
+    y = y * -1;
+    var mouseLocation = gl.getUniformLocation(shaderProgram, "mouseLocation");
+    gl.uniform2f(mouseLocation, x, y)
+}

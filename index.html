@@ -2,14 +2,15 @@
 
 <head>
     <title>Cross Hatching Shader</title>
+    <script   src="https://code.jquery.com/jquery-2.2.3.min.js"   integrity="sha256-a23g1Nt4dtEYOj7bR+vTu7+T8VP13humZFBJNIYoEJo="   crossorigin="anonymous"></script>
 <head>
-
 <script id="shader-fs" type="x-shader/x-fragment">
     precision mediump float;
     //this specifies the precision for webGL. In this case, medium.
     //Options: lowp, mediump, highp.
 
     uniform sampler2D uSampler;
+    uniform sampler2D uSampler2;
     uniform vec4 light_vector;
     uniform vec3 color;
 
@@ -17,6 +18,18 @@
     uniform vec2 canvasSize;
     varying vec4 worldPos;
     varying vec3 mmin, mmax;
+
+/*
+    vec3 getSampleFromArray(sampler2D textures[2], int ndx, vec2 uv) {
+        vec4 mycolor;
+        if (ndx == 0) {
+          mycolor = texture2D(uSampler[0], uv);
+        } else if (ndx == 1) {
+          mycolor = texture2D(uSampler[1], uv);
+        }
+        return mycolor.rgb;
+    }
+    */
 
     void main(void) {
         vec3 finalcolor = vec3(1.0, 1.0, 1.0);
@@ -26,9 +39,12 @@
             finalcolor = color;
         }
         else {
+            /* don't use texture now */
             if((worldPos.x > mmin.x && worldPos.x < mmax.x) && (worldPos.y > mmin.y && worldPos.y < mmax.y)){
                 vec2 coords = worldPos.xy - mmin.xy;
+                //finalcolor = texture2D(uSampler, coords.st).rgb;
                 finalcolor = texture2D(uSampler, coords.st).rgb;
+                //finalcolor = getSampleFromArray(uSampler, 0, vec2(0.5, 0.5));
             }
             finalcolor = finalcolor * bump;
         }
@@ -63,7 +79,7 @@
 
 
 <body onload="webGLStart();">
-    <canvas id="myCanvas" style="border: none;" width="500" height="500"></canvas>
+    <canvas id="myCanvas"  onmousemove="mouseMove(event)" style="border: none;" width="500" height="500"></canvas>
     <script type="text/javascript" src="gl-matrix-min.js"></script>
     <script type="text/javascript" src="parse.js"></script>
     <script type="text/javascript" src="start.js"></script>

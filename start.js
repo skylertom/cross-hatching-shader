@@ -344,7 +344,7 @@ function drawScene() {
             gl.bindTexture(gl.TEXTURE_2D, myTextures[i]);
         }
 
-        shaderProgram.samplerUniform = gl.getUniformLocation(shaderProgram, "uSampler[0]");
+        shaderProgram.samplerUniform = gl.getUniformLocation(shaderProgram, "textures");
         gl.uniform1iv(shaderProgram.samplerUniform, [0,1,2,3,4,5]);
 
 

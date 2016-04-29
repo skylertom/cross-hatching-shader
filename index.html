@@ -9,7 +9,7 @@
     //this specifies the precision for webGL. In this case, medium.
     //Options: lowp, mediump, highp.
 
-    uniform sampler2D uSampler[6];
+    uniform sampler2D textures[6];
     uniform int sampleIndex;
     uniform vec4 light_vector;
     uniform vec3 color;
@@ -19,20 +19,14 @@
     varying vec4 worldPos;
     varying vec3 mmin, mmax;
 
-    vec3 getSampleFromArray(sampler2D textures[6], int ndx, vec2 uv) {
+    /* necessary because you can't index with a type "uniform" */
+    vec3 getSampleFromArray(int ndx, vec2 uv) {
         vec4 mycolor;
         for (int i = 0; i < 6; i++) {
             if (ndx == i) {
-                return texture2D(uSampler[i], uv).rgb;
+                return texture2D(textures[i], uv).rgb;
             }
         }
-        /*
-        if (ndx == 0) {
-          mycolor = texture2D(uSampler[0], uv);
-        } else if (ndx == 1) {
-          mycolor = texture2D(uSampler[1], uv);
-        }
-        */
         return mycolor.rgb;
     }
 
@@ -44,12 +38,9 @@
             finalcolor = color;
         }
         else {
-            /* don't use texture now */
             if((worldPos.x > mmin.x && worldPos.x < mmax.x) && (worldPos.y > mmin.y && worldPos.y < mmax.y)){
                 vec2 coords = worldPos.xy - mmin.xy;
-                //finalcolor = texture2D(uSampler, coords.st).rgb;
-                finalcolor = getSampleFromArray(uSampler, sampleIndex, coords.st);
-                //finalcolor = getSampleFromArray(uSampler, 0, vec2(0.5, 0.5));
+                finalcolor = getSampleFromArray(sampleIndex, coords.st);
             }
             finalcolor = finalcolor * bump;
         }

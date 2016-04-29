@@ -1,5 +1,5 @@
 # Cross Hatching Shader in WebGL
-Implemented based on "Real-Time Hatching" by Emil et al
+Implemented based on ["Real-Time Hatching"](http://dl.acm.org/citation.cfm?id=383328) by Emil et al
 
 Current Status:
 * has lab 9 code working so you can implement shading by triangle

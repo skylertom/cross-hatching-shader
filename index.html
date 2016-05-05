@@ -9,12 +9,13 @@
     //this specifies the precision for webGL. In this case, medium.
     //Options: lowp, mediump, highp.
 
-    uniform sampler2D textures[6];
+    uniform sampler2D textures[7];
     uniform int sampleIndex;
     uniform vec4 light_vector;
     uniform vec3 color;
 
     varying vec3 normal;
+    varying vec2 uv;
     uniform vec2 canvasSize;
     varying vec4 worldPos;
     varying vec3 mmin, mmax;
@@ -22,12 +23,24 @@
     /* necessary because you can't index with a type "uniform" */
     vec3 getSampleFromArray(int ndx, vec2 uv) {
         vec4 mycolor;
-        for (int i = 0; i < 6; i++) {
+        for (int i = 0; i < 7; i++) {
             if (ndx == i) {
                 return texture2D(textures[i], uv).rgb;
             }
         }
         return mycolor.rgb;
+    }
+
+    int getBucket(float bump) {
+        float step = 1.0 / 7.0;
+        for (int i = 0; i < 7; i++) {
+            float temp = float(i);
+            if (bump < (temp / 7.0)) {
+                // 0 is lightest
+                return 6 - i;
+            }
+        }
+        return 6;
     }
 
     void main(void) {
@@ -42,7 +55,9 @@
                 vec2 coords = worldPos.xy - mmin.xy;
                 finalcolor = getSampleFromArray(sampleIndex, coords.st);
             }
+            vec3 sample = getSampleFromArray(getBucket(bump), uv);
             finalcolor = finalcolor * bump;
+            finalcolor = sample;
         }
     	gl_FragColor = vec4(finalcolor, 1.0);
     }
@@ -53,15 +68,18 @@
 
     attribute vec3 aVertexPosition;
     attribute vec3 aVertexNormal;
+    attribute float aVertexPos;
 
     uniform mat4 uMVMatrix;
     uniform mat4 uPMatrix;
     uniform vec2 mouseLocation;
+    //uniform vec4 light_vector;
 
     varying vec3 normal;
+    varying vec4 worldPos;
+    varying vec2 uv;
 
     varying vec3 mmin, mmax;
-    varying vec4 worldPos;
 
     void main(void) {
     	normal = aVertexNormal;
@@ -70,6 +88,16 @@
         vec3 m = vec3(mouseLocation, 1.0);
         mmax = m + .5;
         mmin = m - .5;
+        if (aVertexPos == 0.0) {
+            uv = vec2(.5, 0);
+        }
+        else if (aVertexPos == 1.0) {
+            uv = vec2(0, 1);
+        }
+        else {
+            uv = vec2(1, 1);
+        }
+        //float illuminosity = max(0.0, dot(light_vector.xyz, normal));
     }
 </script>
 

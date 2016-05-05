@@ -1,6 +1,6 @@
 var gl;
 var shaderProgram;
-var vertexPositionBuffer, vertexIndexBuffer, vertexNormalBuffer;
+var vertexPositionBuffer, vertexIndexBuffer, vertexNormalBuffer, vertexPosBuffer;
 var myTextures = [];
 var textureLoaded = false;
 var xLightPos = 0;
@@ -9,7 +9,7 @@ var zLightPos = 0;
 var stop = true;
 var rotate = 0.0;
 var rotateX = 0.0;
-var numTextures = 6;
+var numTextures = 7;
 var texturesLoaded = [];
 
 /* test */
@@ -210,6 +210,17 @@ function initBuffers() {
     shaderProgram.vertexNormalAttribute = gl.getAttribLocation(shaderProgram, "aVertexNormal");
     gl.enableVertexAttribArray(shaderProgram.vertexNormalAttribute);
 
+    var poslist = new Array(myVertexList.length);
+    for (i = 0; i < myVertexList.length; i++) {
+        poslist[i] = i%3;
+    }
+    vertexPosBuffer = gl.createBuffer();
+    gl.bindBuffer(gl.ARRAY_BUFFER, vertexPosBuffer);
+    gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(poslist), gl.STATIC_DRAW);
+    vertexPosBuffer.itemSize = 1;
+    vertexPosBuffer.numItems = myVertexList.length;
+    shaderProgram.vertexPosAttribute = gl.getAttribLocation(shaderProgram, "aVertexPos");
+    gl.enableVertexAttribArray(shaderProgram.vertexPosAttribute);
 }
 
 function onImageLoad() {
@@ -238,8 +249,7 @@ function initTexture() {
          */
         myTextures[i].image.onload = function(i) { onImageLoad(); }
         texturesLoaded.unshift(i);
-        var x = i + 1;
-        myTextures[i].image.src = "images/shading/" + x + ".gif";
+        myTextures[i].image.src = "images/shading/" + i + ".gif";
     }
     textureLoaded = true;
 }
@@ -328,6 +338,9 @@ function drawScene() {
     gl.bindBuffer(gl.ARRAY_BUFFER, vertexNormalBuffer);
     gl.vertexAttribPointer(shaderProgram.vertexNormalAttribute, vertexNormalBuffer.itemSize, gl.FLOAT, false, 0, 0);
 
+    gl.bindBuffer(gl.ARRAY_BUFFER, vertexPosBuffer);
+    gl.vertexAttribPointer(shaderProgram.vertexPosAttribute, vertexPosBuffer.itemSize, gl.FLOAT, false, 0, 0);
+
     shaderProgram.colorUniform = gl.getUniformLocation(shaderProgram, "color");
     gl.uniform3f(shaderProgram.colorUniform, -1, -1, -1);
 
@@ -345,7 +358,7 @@ function drawScene() {
         }
 
         shaderProgram.samplerUniform = gl.getUniformLocation(shaderProgram, "textures");
-        gl.uniform1iv(shaderProgram.samplerUniform, [0,1,2,3,4,5]);
+        gl.uniform1iv(shaderProgram.samplerUniform, [0,1,2,3,4,5,6]);
 
 
         gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, vertexIndexBuffer);

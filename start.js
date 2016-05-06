@@ -11,9 +11,18 @@ var rotate = 0.0;
 var rotateX = 0.0;
 var numTextures = 7;
 var texturesLoaded = [];
+var mouseDown = false;
+var lastMouseX = null;
+var lastMouseY = null;
+var masterRotMat = mat4.create();
+mat4.identity(masterRotMat);
 
 /* test */
 var sampleIndex = 0;
+
+function degToRad(degrees) {
+  return degrees * Math.PI / 180;
+};
 
 function initGL(canvas) {
     try {
@@ -344,12 +353,13 @@ function drawScene() {
     gl.uniform3f(shaderProgram.colorUniform, -1, -1, -1);
 
     pushMatrix(perspectiveMatrix, modelviewMatrix);
-        var changing = mat4.clone(modelviewMatrix);
-        mat4.rotateY(changing, changing, parseFloat(45.0/180.0 * 3.14159));
-        mat4.rotateX(changing, changing, parseFloat(rotateX));
-        modelviewMatrix = mat4.clone(changing);
+        // var changing = mat4.clone(modelviewMatrix);
+        // mat4.rotateY(changing, changing, parseFloat(45.0/180.0 * 3.14159));
+        // mat4.rotateX(changing, changing, parseFloat(rotateX));
+        // modelviewMatrix = mat4.clone(changing);
+        mat4.multiply(modelviewMatrix, modelviewMatrix, masterRotMat);
         shaderProgram.mvMatrixUniform = gl.getUniformLocation(shaderProgram, "uMVMatrix");
-        gl.uniformMatrix4fv(shaderProgram.mvMatrixUniform, false, changing);
+        gl.uniformMatrix4fv(shaderProgram.mvMatrixUniform, false, modelviewMatrix);
 
         for (var i = 0; i < myTextures.length; i++) {
         	gl.activeTexture(gl.TEXTURE0 + i);
@@ -389,24 +399,58 @@ function webGLStart() {
     gl.clearColor(0.0, 0.0, 0.0, 1.0);  //set up the background color (black)
     gl.enable(gl.DEPTH_TEST);
 
+    canvas.onmousedown = mouseClick;
+    document.onmouseup = handleMouseUp;
+    document.onmousemove = mouseMove;
     animateMyScene();
 };
 
 function mouseMove(event) {
-    var x = event.clientX;
-    var y = event.clientY;
+    if (!mouseDown) {
+        return;
+    }
+    var newX = event.clientX;
+    var newY = event.clientY;
 
-	var canvas = document.getElementById("myCanvas");
-    x = x / canvas.width;
-    y = y / canvas.height;
-    x = 2.0 * (x - .5);
-    y = 2.0 * (y - .5);
-    y = y * -1;
-    var mouseLocation = gl.getUniformLocation(shaderProgram, "mouseLocation");
-    gl.uniform2f(mouseLocation, x, y)
+    var deltaX = newX - lastMouseX;
+    var deltaY = newY - lastMouseY;
+
+    var newRotationMatrix = mat4.create();
+    mat4.identity(newRotationMatrix);
+    mat4.rotate(newRotationMatrix, newRotationMatrix, degToRad(deltaX / 10), [0,1,0]);
+    mat4.rotate(newRotationMatrix, newRotationMatrix, degToRad(deltaY / 10), [1,0,0]);
+
+    mat4.multiply(masterRotMat, newRotationMatrix, masterRotMat);
+
+    lastMouseX = newX;
+    lastMouseY = newY;
 }
 
 function mouseClick(event) {
-    var sampleLoc = gl.getUniformLocation(shaderProgram, "sampleIndex");
-    gl.uniform1i(sampleLoc, (sampleIndex++)%myTextures.length);
+    mouseDown = true;
+
+    console.log("mouseClick")
+    lastMouseX = event.clientX;
+    lastMouseY = event.clientY;
 }
+
+function handleMouseUp(event) {
+    console.log("mouseup")
+    mouseDown = false;
+}
+
+$(function() {
+    $( "#startstop" )
+      .click(function( event ) {
+          console.log("starting/stopping")
+          stop = !stop;
+        event.preventDefault();
+    });
+    
+    $("#plyfile").change(function() {
+        var name = $("#plyfile").val() + '.ply';
+        myVertexList = [];
+        myFaceList = [];
+        parse("images/" + name, myVertexList, myFaceList);
+    })
+});

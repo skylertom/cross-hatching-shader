@@ -11,9 +11,18 @@ var rotate = 0.0;
 var rotateX = 0.0;
 var numTextures = 7;
 var texturesLoaded = [];
+var mouseDown = false;
+var lastMouseX = null;
+var lastMouseY = null;
+var masterRotMat = mat4.create();
+mat4.identity(masterRotMat);
 
 /* test */
 var sampleIndex = 0;
+
+function degToRad(radians) {
+  return radians * 180 / 3.14159265;
+};
 
 function initGL(canvas) {
     try {
@@ -388,25 +397,40 @@ function webGLStart() {
 
     gl.clearColor(0.0, 0.0, 0.0, 1.0);  //set up the background color (black)
     gl.enable(gl.DEPTH_TEST);
-
+    
+    canvas.onmousedown = mouseClick;
+    document.onmouseup = handleMouseUp;
+    document.onmousemove = mouseMove;
     animateMyScene();
 };
 
 function mouseMove(event) {
-    var x = event.clientX;
-    var y = event.clientY;
+    if (!mouseDown) {
+        return;
+    }
+    var newX = event.clientX;
+    var newY = event.clientY;
 
-	var canvas = document.getElementById("myCanvas");
-    x = x / canvas.width;
-    y = y / canvas.height;
-    x = 2.0 * (x - .5);
-    y = 2.0 * (y - .5);
-    y = y * -1;
-    var mouseLocation = gl.getUniformLocation(shaderProgram, "mouseLocation");
-    gl.uniform2f(mouseLocation, x, y)
+    var deltaX = newX - lastMouseX;
+    var deltaY = newY - lastMouseY;
+
+    var newRotationMatrix = mat4.create();
+    mat4.identity(newRotationMatrix);
+    mat4.rotate(newRotationMatrix, degToRad(deltaX / 10), [0,1,0]);
+    mat4.rotate(newRotationMatrix, degToRad(deltaY / 10), [1,0,0]);
+
+    mat4.multiply(newRotationMatrix, masterRotMat, masterRotMat);
+
+    lastMouseX = newX;
+    lastMouseY = newY;
 }
 
 function mouseClick(event) {
-    var sampleLoc = gl.getUniformLocation(shaderProgram, "sampleIndex");
-    gl.uniform1i(sampleLoc, (sampleIndex++)%myTextures.length);
+    mouseDown = true;
+    lastMouseX = event.clientX;
+    lastMouseY = event.clientY;
+}
+
+function handleMouseUp(event) {
+    mouseDown = false;
 }

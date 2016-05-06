@@ -23,18 +23,11 @@
     /* necessary because you can't index with a type "uniform" */
     vec3 getSampleFromArray(int ndx, float rotation, vec2 uv) {
         vec4 mycolor;
-        /* 7 is number of textures */
-        int texture_index = int(mod(rotation, 2.)) * 7 + ndx;
         /* rotate uv by angle * 90 degrees */
         float angle = (mod(rotation, 4.)) / 2.0;
-        for (int i = 0; i < 14; i++) {
-            if (texture_index == i) {
-                if (angle > .6) {
-                    return texture2D(textures[i], mat2(0., 1., -1., 0.) * uv).rgb;
-                }
-                else {
-                    return texture2D(textures[i], uv.st).rgb;
-                }
+        for (int i = 0; i < 7; i++) {
+            if (ndx == i) {
+                return texture2D(textures[i], mat2(cos(rotation), sin(rotation), -1. * sin(rotation), cos(rotation)) * uv).rgb;
             }
         }
         return mycolor.rgb;
@@ -65,8 +58,8 @@
         vec3 up_vector = vec3(0., 1., 0.);
         vec3 finalcolor = vec3(1.0, 1.0, 1.0);
         float bump = max(0.0, dot(light_vector.xyz, normal));
-        finalcolor = getSampleFromArray(getBucket(bump), float(rotationBucket(normal, up_vector)), worldPos.st * 6.0);
-        //finalcolor = getSampleFromArray(getBucket(bump), 0., worldPos.st * 6.0);
+        //finalcolor = getSampleFromArray(getBucket(bump), float(rotationBucket(normal, up_vector)), worldPos.st * 6.0);
+        finalcolor = getSampleFromArray(getBucket(bump), -1. * acos(dot(normal, up_vector)), worldPos.st * 6.0);
     	gl_FragColor = vec4(finalcolor, 1.0);
     }
 </script>

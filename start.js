@@ -398,7 +398,7 @@ function webGLStart() {
 
     gl.clearColor(0.0, 0.0, 0.0, 1.0);  //set up the background color (black)
     gl.enable(gl.DEPTH_TEST);
-    
+
     canvas.onmousedown = mouseClick;
     document.onmouseup = handleMouseUp;
     document.onmousemove = mouseMove;
@@ -438,3 +438,19 @@ function handleMouseUp(event) {
     console.log("mouseup")
     mouseDown = false;
 }
+
+$(function() {
+    $( "#startstop" )
+      .click(function( event ) {
+          console.log("starting/stopping")
+          stop = !stop;
+        event.preventDefault();
+    });
+    
+    $("#plyfile").change(function() {
+        var name = $("#plyfile").val() + '.ply';
+        myVertexList = [];
+        myFaceList = [];
+        parse("images/" + name, myVertexList, myFaceList);
+    })
+});

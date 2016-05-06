@@ -264,7 +264,7 @@ function initTexture() {
          */
         myTextures[i + numTextures].image.onload = function(i) { onImageLoad(); }
         texturesLoaded.unshift(i + numTextures);
-        myTextures[i + numTextures].image.src = "images/shading/" + i + "45.gif";
+        myTextures[i + numTextures].image.src = "images/shading/" + i + "135.gif";
     }
     textureLoaded = true;
 }

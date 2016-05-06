@@ -15,7 +15,7 @@
     uniform vec3 color;
 
     varying vec3 normal;
-    varying vec2 uv;
+    varying vec2 uv;//blue
     uniform vec2 canvasSize;
     varying vec4 worldPos;
     varying vec3 mmin, mmax;
@@ -48,7 +48,7 @@
     void main(void) {
         vec3 finalcolor = vec3(1.0, 1.0, 1.0);
         float bump = max(0.0, dot(light_vector.xyz, normal));
-        finalcolor = getSampleFromArray(getBucket(bump), worldPos.st);
+        finalcolor = getSampleFromArray(getBucket(bump), uv);
     	gl_FragColor = vec4(finalcolor, 1.0);
     }
 </script>

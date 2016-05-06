@@ -1,6 +1,6 @@
 var gl;
 var shaderProgram;
-var vertexPositionBuffer, vertexIndexBuffer, vertexNormalBuffer, vertexPosBuffer;
+var vertexPositionBuffer, vertexIndexBuffer, vertexNormalBuffer;
 var myTextures = [];
 var textureLoaded = false;
 var xLightPos = 0;
@@ -218,20 +218,6 @@ function initBuffers() {
 
     shaderProgram.vertexNormalAttribute = gl.getAttribLocation(shaderProgram, "aVertexNormal");
     gl.enableVertexAttribArray(shaderProgram.vertexNormalAttribute);
-
-    /* instead make tiling system! */
-    var poslist = new Array(myVertexList.length);
-    for (var i = 0; i < myVertexList.length; i++) {
-        //poslist[i] = i%3;
-        poslist[i] = i % (myVertexList.length / 3.0)
-    }
-    vertexPosBuffer = gl.createBuffer();
-    gl.bindBuffer(gl.ARRAY_BUFFER, vertexPosBuffer);
-    gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(poslist), gl.STATIC_DRAW);
-    vertexPosBuffer.itemSize = 1;
-    vertexPosBuffer.numItems = myVertexList.length;
-    shaderProgram.vertexPosAttribute = gl.getAttribLocation(shaderProgram, "aVertexPos");
-    gl.enableVertexAttribArray(shaderProgram.vertexPosAttribute);
 }
 
 function onImageLoad() {
@@ -246,6 +232,9 @@ function onImageLoad() {
     gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.NEAREST);
     gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.NEAREST);
     gl.bindTexture(gl.TEXTURE_2D, null);
+    if (texturesLoaded.length == 0) {
+        textureLoaded = true;
+    }
 }
 
 function initTexture() {
@@ -275,7 +264,6 @@ function initTexture() {
         texturesLoaded.unshift(i + numTextures);
         myTextures[i + numTextures].image.src = "images/shading/" + i + "135.gif";
     }
-    textureLoaded = true;
 }
 
 function pushMatrix(perspectiveMatrix, modelviewMatrix) {
@@ -345,9 +333,6 @@ function drawScene() {
 
     gl.bindBuffer(gl.ARRAY_BUFFER, vertexNormalBuffer);
     gl.vertexAttribPointer(shaderProgram.vertexNormalAttribute, vertexNormalBuffer.itemSize, gl.FLOAT, false, 0, 0);
-
-    gl.bindBuffer(gl.ARRAY_BUFFER, vertexPosBuffer);
-    gl.vertexAttribPointer(shaderProgram.vertexPosAttribute, vertexPosBuffer.itemSize, gl.FLOAT, false, 0, 0);
 
     shaderProgram.colorUniform = gl.getUniformLocation(shaderProgram, "color");
     gl.uniform3f(shaderProgram.colorUniform, -1, -1, -1);
@@ -429,24 +414,21 @@ function mouseMove(event) {
 function mouseClick(event) {
     mouseDown = true;
 
-    console.log("mouseClick")
     lastMouseX = event.clientX;
     lastMouseY = event.clientY;
 }
 
 function handleMouseUp(event) {
-    console.log("mouseup")
     mouseDown = false;
 }
 
 $(function() {
     $( "#startstop" )
       .click(function( event ) {
-          console.log("starting/stopping")
           stop = !stop;
         event.preventDefault();
     });
-    
+
     $("#plyfile").change(function() {
         var name = $("#plyfile").val() + '.ply';
         myVertexList = [];

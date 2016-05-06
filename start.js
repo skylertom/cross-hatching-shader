@@ -20,8 +20,8 @@ mat4.identity(masterRotMat);
 /* test */
 var sampleIndex = 0;
 
-function degToRad(radians) {
-  return radians * 180 / 3.14159265;
+function degToRad(degrees) {
+  return degrees * Math.PI / 180;
 };
 
 function initGL(canvas) {
@@ -353,12 +353,13 @@ function drawScene() {
     gl.uniform3f(shaderProgram.colorUniform, -1, -1, -1);
 
     pushMatrix(perspectiveMatrix, modelviewMatrix);
-        var changing = mat4.clone(modelviewMatrix);
-        mat4.rotateY(changing, changing, parseFloat(45.0/180.0 * 3.14159));
-        mat4.rotateX(changing, changing, parseFloat(rotateX));
-        modelviewMatrix = mat4.clone(changing);
+        // var changing = mat4.clone(modelviewMatrix);
+        // mat4.rotateY(changing, changing, parseFloat(45.0/180.0 * 3.14159));
+        // mat4.rotateX(changing, changing, parseFloat(rotateX));
+        // modelviewMatrix = mat4.clone(changing);
+        mat4.multiply(modelviewMatrix, modelviewMatrix, masterRotMat);
         shaderProgram.mvMatrixUniform = gl.getUniformLocation(shaderProgram, "uMVMatrix");
-        gl.uniformMatrix4fv(shaderProgram.mvMatrixUniform, false, changing);
+        gl.uniformMatrix4fv(shaderProgram.mvMatrixUniform, false, modelviewMatrix);
 
         for (var i = 0; i < myTextures.length; i++) {
         	gl.activeTexture(gl.TEXTURE0 + i);
@@ -416,10 +417,10 @@ function mouseMove(event) {
 
     var newRotationMatrix = mat4.create();
     mat4.identity(newRotationMatrix);
-    mat4.rotate(newRotationMatrix, degToRad(deltaX / 10), [0,1,0]);
-    mat4.rotate(newRotationMatrix, degToRad(deltaY / 10), [1,0,0]);
+    mat4.rotate(newRotationMatrix, newRotationMatrix, degToRad(deltaX / 10), [0,1,0]);
+    mat4.rotate(newRotationMatrix, newRotationMatrix, degToRad(deltaY / 10), [1,0,0]);
 
-    mat4.multiply(newRotationMatrix, masterRotMat, masterRotMat);
+    mat4.multiply(masterRotMat, newRotationMatrix, masterRotMat);
 
     lastMouseX = newX;
     lastMouseY = newY;
@@ -427,10 +428,13 @@ function mouseMove(event) {
 
 function mouseClick(event) {
     mouseDown = true;
+
+    console.log("mouseClick")
     lastMouseX = event.clientX;
     lastMouseY = event.clientY;
 }
 
 function handleMouseUp(event) {
+    console.log("mouseup")
     mouseDown = false;
 }

@@ -6,7 +6,6 @@ var textureLoaded = false;
 var xLightPos = 0;
 var yLightPos = 0;
 var zLightPos = 0;
-var stop = true;
 var rotate = 0.0;
 var rotateX = 0.0;
 var numTextures = 7;
@@ -16,6 +15,25 @@ var lastMouseX = null;
 var lastMouseY = null;
 var masterRotMat = mat4.create();
 mat4.identity(masterRotMat);
+
+var Settings = function() {
+    this['Orbit Light'] = true;
+    this.speed = .8;
+    this.ambient = 1;
+    this.diffuse = 100;
+    this.specular = 100;
+    this.rim = 0;
+    this.shininess = 100;
+    this.invertRim = false;
+    this.displayOutline = false;
+    this.solidRender = false;
+    this.inkColor = [ 0, 0, 90 ];
+    this.model = 3;
+    this.paper = 1;
+    this.preset = 0;
+};
+var settings = new Settings();
+var gui = new dat.GUI();
 
 /* test */
 var sampleIndex = 0;
@@ -288,7 +306,7 @@ function popMatrix(perspectiveMatrix, modelviewMatrix) {
 }
 
 function drawLightSource(perspectiveMatrix, modelviewMatrix){
-    if (!stop) {
+    if (settings['Orbit Light']) {
     	xLightPos += 0.007;
     	yLightPos = 0;
     	zLightPos += 0.007;
@@ -423,16 +441,13 @@ function handleMouseUp(event) {
 }
 
 $(function() {
-    $( "#startstop" )
-      .click(function( event ) {
-          stop = !stop;
-        event.preventDefault();
-    });
-
     $("#plyfile").change(function() {
         var name = $("#plyfile").val() + '.ply';
         myVertexList = [];
         myFaceList = [];
         parse("images/" + name, myVertexList, myFaceList);
     })
+
+    gui.add(settings, 'Orbit Light');
+    gui.add(settings, 'speed', -5, 5);
 });

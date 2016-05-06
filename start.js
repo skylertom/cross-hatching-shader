@@ -210,9 +210,11 @@ function initBuffers() {
     shaderProgram.vertexNormalAttribute = gl.getAttribLocation(shaderProgram, "aVertexNormal");
     gl.enableVertexAttribArray(shaderProgram.vertexNormalAttribute);
 
+    /* instead make tiling system! */
     var poslist = new Array(myVertexList.length);
-    for (i = 0; i < myVertexList.length; i++) {
-        poslist[i] = i%3;
+    for (var i = 0; i < myVertexList.length; i++) {
+        //poslist[i] = i%3;
+        poslist[i] = i % (myVertexList.length / 3.0)
     }
     vertexPosBuffer = gl.createBuffer();
     gl.bindBuffer(gl.ARRAY_BUFFER, vertexPosBuffer);
@@ -285,26 +287,10 @@ function drawLightSource(perspectiveMatrix, modelviewMatrix){
     // Actual values that we calculate and send to the shader
     var xLightValue = .5 * Math.sin(xLightPos);
     var yLightValue = .5 * yLightPos;
-    var zLighValue = .5 * Math.cos(zLightPos);
+    var zLightValue = .5 * Math.cos(zLightPos);
 
     shaderProgram.lightUniform = gl.getUniformLocation(shaderProgram, "light_vector");
-    gl.uniform4f(shaderProgram.lightUniform, xLightValue, yLightValue, zLighValue, 1.0);
-
-    pushMatrix(perspectiveMatrix, modelviewMatrix);
-        modelviewMatrix = mat4.create();  //defaults to an identity matrix
-        mat4.translate(modelviewMatrix, modelviewMatrix, [0.0, 0.0, -1]);
-        mat4.translate(modelviewMatrix, modelviewMatrix, vec3.fromValues(xLightValue, yLightValue, zLighValue));
-    	mat4.scale(modelviewMatrix, modelviewMatrix, vec3.fromValues(.1, .1, .1));
-        shaderProgram.mvMatrixUniform = gl.getUniformLocation(shaderProgram, "uMVMatrix");
-        gl.uniformMatrix4fv(shaderProgram.mvMatrixUniform, false, modelviewMatrix);
-
-        shaderProgram.colorUniform = gl.getUniformLocation(shaderProgram, "color");
-        gl.uniform3f(shaderProgram.colorUniform, 1.0, 1.0, 0);
-
-        // right now draw mini yellow bunny instead of dealing with the sphere
-        gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, vertexIndexBuffer);
-        gl.drawElements(gl.TRIANGLES, vertexIndexBuffer.numItems, gl.UNSIGNED_SHORT, 0);
-    popMatrix();
+    gl.uniform4f(shaderProgram.lightUniform, xLightValue, yLightValue, zLightValue, 1.0);
 }
 
 function drawScene() {

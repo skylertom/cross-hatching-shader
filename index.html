@@ -15,7 +15,7 @@
     uniform vec3 color;
 
     varying vec3 normal;
-    varying vec2 uv;
+    varying vec2 uv;//blue
     uniform vec2 canvasSize;
     varying vec4 worldPos;
     varying vec3 mmin, mmax;
@@ -31,6 +31,8 @@
         return mycolor.rgb;
     }
 
+    // really should be mixing buckets of the two nearest shapes to get the
+    // exact bump value
     int getBucket(float bump) {
         float step = 1.0 / 7.0;
         for (int i = 0; i < 7; i++) {
@@ -46,19 +48,7 @@
     void main(void) {
         vec3 finalcolor = vec3(1.0, 1.0, 1.0);
         float bump = max(0.0, dot(light_vector.xyz, normal));
-
-    	if (color.r > 0.0) {
-            finalcolor = color;
-        }
-        else {
-            if((worldPos.x > mmin.x && worldPos.x < mmax.x) && (worldPos.y > mmin.y && worldPos.y < mmax.y)){
-                vec2 coords = worldPos.xy - mmin.xy;
-                finalcolor = getSampleFromArray(sampleIndex, coords.st);
-            }
-            vec3 sample = getSampleFromArray(getBucket(bump), uv);
-            finalcolor = finalcolor * bump;
-            finalcolor = sample;
-        }
+        finalcolor = getSampleFromArray(getBucket(bump), uv);
     	gl_FragColor = vec4(finalcolor, 1.0);
     }
 </script>
@@ -97,7 +87,8 @@
         else {
             uv = vec2(1, 1);
         }
-        //float illuminosity = max(0.0, dot(light_vector.xyz, normal));
+        /* test */
+        uv = vec2(aVertexPos, 0);
     }
 </script>
 

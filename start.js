@@ -345,7 +345,7 @@ function drawScene() {
 
     pushMatrix(perspectiveMatrix, modelviewMatrix);
         var changing = mat4.clone(modelviewMatrix);
-        mat4.rotateY(changing, changing, parseFloat(rotate));
+        mat4.rotateY(changing, changing, parseFloat(45.0/180.0 * 3.14159));
         mat4.rotateX(changing, changing, parseFloat(rotateX));
         modelviewMatrix = mat4.clone(changing);
         shaderProgram.mvMatrixUniform = gl.getUniformLocation(shaderProgram, "uMVMatrix");

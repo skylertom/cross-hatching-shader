@@ -266,32 +266,6 @@ function initTexture() {
         texturesLoaded.unshift(i + numTextures);
         myTextures[i + numTextures].image.src = "images/shading/" + i + "45.gif";
     }
-    for (var i = 0; i < numTextures; i++) {
-        myTextures.push(gl.createTexture());
-        myTextures[i + (numTextures * 2)].image = new Image();
-        /* problem with asynchronous calls to this
-         * I added indices to a queue (texturesLoaded) and
-            go through the queue adding the images to my list
-            if we try to pass an integer directly to it, it will
-            overwrite that every time with the last integer
-         */
-        myTextures[i+ (numTextures * 2)].image.onload = function(i) { onImageLoad(); }
-        texturesLoaded.unshift(i+ (numTextures * 2));
-        myTextures[i + (numTextures * 2)].image.src = "images/shading/" + i + "90.gif";
-    }
-    for (var i = 0; i < numTextures; i++) {
-        myTextures.push(gl.createTexture());
-        myTextures[i + (numTextures * 3)].image = new Image();
-        /* problem with asynchronous calls to this
-         * I added indices to a queue (texturesLoaded) and
-            go through the queue adding the images to my list
-            if we try to pass an integer directly to it, it will
-            overwrite that every time with the last integer
-         */
-        myTextures[i + (numTextures * 3)].image.onload = function(i) { onImageLoad(); }
-        texturesLoaded.unshift(i + (numTextures * 3));
-        myTextures[i + (numTextures * 3)].image.src = "images/shading/" + i + "135.gif";
-    }
     textureLoaded = true;
 }
 

@@ -1,5 +1,6 @@
 var gl;
 var shaderProgram;
+var backProgram;
 var vertexPositionBuffer, vertexIndexBuffer, vertexNormalBuffer;
 var myTextures = [];
 var textureLoaded = false;
@@ -21,6 +22,7 @@ var Settings = function() {
     this['Orbit Light'] = false;
     this.speed = .8;
     this.image = 'bunny';
+    this.illuminate = false;
 
     this.ambient = 1;
     this.diffuse = 100;
@@ -109,6 +111,21 @@ function initShaders() {
     }
 
     gl.useProgram(shaderProgram);
+
+    // background shader
+    var otherfrag = loadShader("shader2-fs");
+    var othervert = loadShader("shader2-vs");
+
+    backProgram = gl.createProgram();
+    gl.attachShader(backProgram, othervert);
+    gl.attachShader(backProgram, otherfrag);
+    gl.linkProgram(backProgram);
+
+    if (!gl.getProgramParameter(backProgram, gl.LINK_STATUS)) {
+        alert("Could not initialize shaders");
+    }
+
+    gl.useProgram(backProgram);
 }
 
 function initBuffers() {
@@ -342,6 +359,11 @@ function drawScene() {
     gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
 
 
+    gl.useProgram(shaderProgram);
+
+    shaderProgram.illuminate = gl.getUniformLocation(shaderProgram, "illuminate");
+    gl.uniform1i(shaderProgram.illuminate, settings.illuminate ? 1 : 0);
+
 //setting up the camera
     var perspectiveMatrix = mat4.create(); //defaults to an identity matrix
     mat4.perspective(perspectiveMatrix, 45, gl.viewportWidth / gl.viewportHeight, 0.1, 100.0);
@@ -366,10 +388,6 @@ function drawScene() {
     gl.uniform3f(shaderProgram.colorUniform, -1, -1, -1);
 
     pushMatrix(perspectiveMatrix, modelviewMatrix);
-        // var changing = mat4.clone(modelviewMatrix);
-        // mat4.rotateY(changing, changing, parseFloat(45.0/180.0 * 3.14159));
-        // mat4.rotateX(changing, changing, parseFloat(rotateX));
-        // modelviewMatrix = mat4.clone(changing);
         mat4.multiply(modelviewMatrix, modelviewMatrix, masterRotMat);
         shaderProgram.mvMatrixUniform = gl.getUniformLocation(shaderProgram, "uMVMatrix");
         gl.uniformMatrix4fv(shaderProgram.mvMatrixUniform, false, modelviewMatrix);
@@ -387,6 +405,36 @@ function drawScene() {
         gl.drawElements(gl.TRIANGLES, vertexIndexBuffer.numItems, gl.UNSIGNED_SHORT, 0);
     popMatrix();
     drawLightSource(perspectiveMatrix, modelviewMatrix);
+
+    // set up background
+    // look up where the vertex data needs to go.
+    gl.useProgram(backProgram);
+    var positionLocation = gl.getAttribLocation(backProgram, "a_position");
+
+    backProgram.mvMatrixUniform = gl.getUniformLocation(backProgram, "uMVMatrix");
+    gl.uniformMatrix4fv(backProgram.mvMatrixUniform, false, modelviewMatrix);
+
+    backProgram.mvMatrixUniform = gl.getUniformLocation(backProgram, "uMVMatrix");
+    gl.uniformMatrix4fv(backProgram.mvMatrixUniform, false, modelviewMatrix);
+
+    // Create a buffer and put a single clipspace rectangle in
+    // it (2 triangles)
+    var buffer = gl.createBuffer();
+    gl.bindBuffer(gl.ARRAY_BUFFER, buffer);
+    gl.bufferData(
+        gl.ARRAY_BUFFER,
+        new Float32Array([
+            0., 0.,
+            1., 0.,
+            0., 1.,
+            0., 0.,
+            1., 0.,
+            0., 1.]),
+        gl.STATIC_DRAW);
+    gl.enableVertexAttribArray(positionLocation);
+    gl.vertexAttribPointer(positionLocation, 2, gl.FLOAT, false, 0, 0);
+    // draw
+    gl.drawArrays(gl.TRIANGLES, 0, 6);
 }
 
 function animateMyScene() {
@@ -454,4 +502,5 @@ $(function() {
     gui.add(settings, 'Orbit Light');
     gui.add(settings, 'speed', -5, 5);
     gui.add(settings, 'image', ['bunny', 'dragon', 'happy', 'sphere', 'spider', 'turbine', 'dolphins']);
+    gui.add(settings, 'illuminate');
 });

@@ -21,20 +21,7 @@ var Settings = function() {
     this['Orbit Light'] = false;
     this.speed = .8;
     this.image = 'bunny';
-    this.illuminate = false;
-
-    this.ambient = 1;
-    this.diffuse = 100;
-    this.specular = 100;
-    this.rim = 0;
-    this.shininess = 100;
-    this.invertRim = false;
-    this.displayOutline = false;
-    this.solidRender = false;
-    this.inkColor = [ 0, 0, 90 ];
-    this.model = 3;
-    this.paper = 1;
-    this.preset = 0;
+    this.drawingStyle = 0;
 };
 var settings = new Settings();
 var gui = new dat.GUI();

@@ -8,6 +8,7 @@ var yLightPos = 0;
 var zLightPos = 0;
 var rotate = 0.0;
 var rotateX = 0.0;
+var image_name = "bunny";
 var numTextures = 7;
 var texturesLoaded = [];
 var mouseDown = false;
@@ -17,8 +18,10 @@ var masterRotMat = mat4.create();
 mat4.identity(masterRotMat);
 
 var Settings = function() {
-    this['Orbit Light'] = true;
+    this['Orbit Light'] = false;
     this.speed = .8;
+    this.image = 'bunny';
+
     this.ambient = 1;
     this.diffuse = 100;
     this.specular = 100;
@@ -307,9 +310,9 @@ function popMatrix(perspectiveMatrix, modelviewMatrix) {
 
 function drawLightSource(perspectiveMatrix, modelviewMatrix){
     if (settings['Orbit Light']) {
-    	xLightPos += 0.007;
+        xLightPos += settings.speed / 100;
+        zLightPos += settings.speed / 100;
     	yLightPos = 0;
-    	zLightPos += 0.007;
     }
 
     // Actual values that we calculate and send to the shader
@@ -326,6 +329,13 @@ function drawScene() {
 //  when the textures have not been loaded
     if (textureLoaded == false) {
         return;
+    }
+
+    if (settings.image != image_name) {
+        image_name = settings.image;
+        myVertexList = [];
+        myFaceList = [];
+        parse("images/" + image_name + ".ply", myVertexList, myFaceList);
     }
 
     gl.viewport(0, 0, gl.viewportWidth, gl.viewportHeight);
@@ -393,7 +403,7 @@ function webGLStart() {
     var canvasSize = gl.getUniformLocation(shaderProgram, "canvasSize");
     gl.uniform2f(canvasSize, canvas.width, canvas.height);
 
-    parse("images/bunny.ply", myVertexList, myFaceList);
+    parse("images/" + image_name + ".ply", myVertexList, myFaceList);
 //initBuffers() would normally be called here, but it's now called from within
 // parse() because of the asynchronous nature of javascript file loading
 //initBuffers();
@@ -441,13 +451,7 @@ function handleMouseUp(event) {
 }
 
 $(function() {
-    $("#plyfile").change(function() {
-        var name = $("#plyfile").val() + '.ply';
-        myVertexList = [];
-        myFaceList = [];
-        parse("images/" + name, myVertexList, myFaceList);
-    })
-
     gui.add(settings, 'Orbit Light');
     gui.add(settings, 'speed', -5, 5);
+    gui.add(settings, 'image', ['bunny', 'dragon', 'happy', 'sphere', 'spider', 'turbine', 'dolphins']);
 });

@@ -1,0 +1,16 @@
+#container {
+    background: #f0f0f0 url( images/blue_grid.jpg ) repeat;
+    margin: 0;
+    height: 100%;
+    width: 100%;
+    text-align: center;
+    top: 50%;
+}
+
+body {
+    margin: 0;
+}
+
+canvas {
+    margin-top: 5%;
+}

@@ -1,6 +1,5 @@
 var gl;
 var shaderProgram;
-var backProgram;
 var vertexPositionBuffer, vertexIndexBuffer, vertexNormalBuffer;
 var myTextures = [];
 var textureLoaded = false;
@@ -111,21 +110,6 @@ function initShaders() {
     }
 
     gl.useProgram(shaderProgram);
-
-    // background shader
-    var otherfrag = loadShader("shader2-fs");
-    var othervert = loadShader("shader2-vs");
-
-    backProgram = gl.createProgram();
-    gl.attachShader(backProgram, othervert);
-    gl.attachShader(backProgram, otherfrag);
-    gl.linkProgram(backProgram);
-
-    if (!gl.getProgramParameter(backProgram, gl.LINK_STATUS)) {
-        alert("Could not initialize shaders");
-    }
-
-    gl.useProgram(backProgram);
 }
 
 function initBuffers() {
@@ -405,36 +389,6 @@ function drawScene() {
         gl.drawElements(gl.TRIANGLES, vertexIndexBuffer.numItems, gl.UNSIGNED_SHORT, 0);
     popMatrix();
     drawLightSource(perspectiveMatrix, modelviewMatrix);
-
-    // set up background
-    // look up where the vertex data needs to go.
-    gl.useProgram(backProgram);
-    var positionLocation = gl.getAttribLocation(backProgram, "a_position");
-
-    backProgram.mvMatrixUniform = gl.getUniformLocation(backProgram, "uMVMatrix");
-    gl.uniformMatrix4fv(backProgram.mvMatrixUniform, false, modelviewMatrix);
-
-    backProgram.mvMatrixUniform = gl.getUniformLocation(backProgram, "uMVMatrix");
-    gl.uniformMatrix4fv(backProgram.mvMatrixUniform, false, modelviewMatrix);
-
-    // Create a buffer and put a single clipspace rectangle in
-    // it (2 triangles)
-    var buffer = gl.createBuffer();
-    gl.bindBuffer(gl.ARRAY_BUFFER, buffer);
-    gl.bufferData(
-        gl.ARRAY_BUFFER,
-        new Float32Array([
-            0., 0.,
-            1., 0.,
-            0., 1.,
-            0., 0.,
-            1., 0.,
-            0., 1.]),
-        gl.STATIC_DRAW);
-    gl.enableVertexAttribArray(positionLocation);
-    gl.vertexAttribPointer(positionLocation, 2, gl.FLOAT, false, 0, 0);
-    // draw
-    gl.drawArrays(gl.TRIANGLES, 0, 6);
 }
 
 function animateMyScene() {
@@ -457,7 +411,7 @@ function webGLStart() {
 //initBuffers();
 
 
-    gl.clearColor(0.0, 0.0, 0.0, 1.0);  //set up the background color (black)
+    gl.clearColor(0.0, 0.0, 0.0, 0.0);  //set up the background color (transparent)
     gl.enable(gl.DEPTH_TEST);
 
     canvas.onmousedown = mouseClick;

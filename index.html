@@ -3,25 +3,9 @@
 <head>
     <title>Cross Hatching Shader</title>
     <link rel='shortcut icon' type='image/x-icon' href='/favicon.ico' />
+    <link rel='stylesheet' type='text/css' href='style.css' />
 <head>
-
-<script id="shader2-vs" type="x-shader/x-vertex">
-    attribute vec2 a_position;
-    uniform mat4 uMVMatrix;
-    uniform mat4 uPMatrix;
-
-    void main() {
-      //gl_Position = vec4(a_position.xy, -1.5, 1);
-      gl_Position = uPMatrix * uMVMatrix * vec4(500. * a_position, -0, 1.0);
-    }
-</script>
-
-<script id="shader2-fs" type="x-shader/x-fragment">
-    void main() {
-      gl_FragColor = vec4(0, 1, 0, 1);  // green
-    }
-</script>
-
+    
 <script id="shader-fs" type="x-shader/x-fragment">
     precision mediump float;
     //this specifies the precision for webGL. In this case, medium.
@@ -109,7 +93,9 @@
 
 
 <body onload="webGLStart();">
-    <canvas id="myCanvas" onmousemove="mouseMove(event)" style="border: none;" width="500" height="500"></canvas>
+    <div id="container">
+        <canvas id="myCanvas" onmousemove="mouseMove(event)" style="border: none;" width="500" height="500"></canvas>
+    </div>
     <script   src="https://code.jquery.com/jquery-2.2.3.min.js"   integrity="sha256-a23g1Nt4dtEYOj7bR+vTu7+T8VP13humZFBJNIYoEJo="   crossorigin="anonymous"></script>
     <script   src="https://code.jquery.com/ui/1.12.0-rc.2/jquery-ui.min.js"   integrity="sha256-55Jz3pBCF8z9jBO1qQ7cIf0L+neuPTD1u7Ytzrp2dqo="   crossorigin="anonymous"></script>
     <script type="text/javascript" src="gl-matrix-min.js"></script>

@@ -323,6 +323,8 @@ function drawLightSource(perspectiveMatrix, modelviewMatrix){
 
     shaderProgram.lightUniform = gl.getUniformLocation(shaderProgram, "light_vector");
     gl.uniform4f(shaderProgram.lightUniform, xLightValue, yLightValue, zLightValue, 1.0);
+        shaderProgram.colorUniform = gl.getUniformLocation(shaderProgram, "sun");
+        gl.uniform1i(shaderProgram.colorUniform, 1);
 }
 
 function drawScene() {
@@ -345,8 +347,11 @@ function drawScene() {
 
     gl.useProgram(shaderProgram);
 
-    shaderProgram.illuminate = gl.getUniformLocation(shaderProgram, "illuminate");
-    gl.uniform1i(shaderProgram.illuminate, settings.illuminate ? 1 : 0);
+    shaderProgram.colorUniform = gl.getUniformLocation(shaderProgram, "sun");
+    gl.uniform1i(shaderProgram.colorUniform, 0);
+
+    shaderProgram.drawingStyle = gl.getUniformLocation(shaderProgram, "drawingStyle");
+    gl.uniform1i(shaderProgram.drawingStyle, settings.drawingStyle);
 
 //setting up the camera
     var perspectiveMatrix = mat4.create(); //defaults to an identity matrix
@@ -456,5 +461,5 @@ $(function() {
     gui.add(settings, 'Orbit Light');
     gui.add(settings, 'speed', -5, 5);
     gui.add(settings, 'image', ['bunny', 'dragon', 'happy', 'sphere', 'spider', 'turbine', 'dolphins']);
-    gui.add(settings, 'illuminate');
+    gui.add(settings, 'drawingStyle', {'drawing': 0, 'drawing no rotation': 1, 'illuination': 2});
 });

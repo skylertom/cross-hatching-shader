@@ -5,7 +5,7 @@
     <link rel='shortcut icon' type='image/x-icon' href='/favicon.ico' />
     <link rel='stylesheet' type='text/css' href='style.css' />
 <head>
-    
+
 <script id="shader-fs" type="x-shader/x-fragment">
     precision mediump float;
     //this specifies the precision for webGL. In this case, medium.
@@ -14,7 +14,8 @@
     uniform sampler2D textures[14];
     uniform vec4 light_vector;
     uniform vec3 color;
-    uniform int illuminate;
+    uniform int drawingStyle;
+    uniform int sun;
 
     varying vec3 normal;
     uniform vec2 canvasSize;
@@ -56,8 +57,14 @@
 
     void main(void) {
         float bump = max(0.0, dot(light_vector.xyz, normal));
-        if (illuminate == 1) {
+        if (sun == 1) {
+            gl_FragColor = vec4(1., 1., 0., 1.);
+        }
+        else if (drawingStyle == 2) {
             gl_FragColor = vec4(bump * vec3(1., 1., 1.), 1.);
+        }
+        else if (drawingStyle == 1) {
+            gl_FragColor = vec4(getSampleFromArray(getBucket(bump), 0., worldPos.st * 6.0), 1.0);
         }
         else {
             vec3 up_vector = vec3(0., 1., 0.);

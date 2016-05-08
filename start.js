@@ -260,19 +260,21 @@ function initTexture() {
         texturesLoaded.unshift(i);
         myTextures[i].image.src = "images/shading/" + i + "0.gif";
     }
+    /*
     for (var i = 0; i < numTextures; i++) {
         myTextures.push(gl.createTexture());
         myTextures[i + numTextures].image = new Image();
-        /* problem with asynchronous calls to this
-         * I added indices to a queue (texturesLoaded) and
-            go through the queue adding the images to my list
-            if we try to pass an integer directly to it, it will
-            overwrite that every time with the last integer
-         */
+        // problem with asynchronous calls to this
+        // I added indices to a queue (texturesLoaded) and
+        //    go through the queue adding the images to my list
+        //    if we try to pass an integer directly to it, it will
+        //    overwrite that every time with the last integer
+        //
         myTextures[i + numTextures].image.onload = function(i) { onImageLoad(); }
         texturesLoaded.unshift(i + numTextures);
         myTextures[i + numTextures].image.src = "images/shading/" + i + "135.gif";
     }
+    */
 }
 
 function pushMatrix(perspectiveMatrix, modelviewMatrix) {
@@ -374,7 +376,7 @@ function drawScene() {
         }
 
         shaderProgram.samplerUniform = gl.getUniformLocation(shaderProgram, "textures");
-        gl.uniform1iv(shaderProgram.samplerUniform, [0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25,26,27]);
+        gl.uniform1iv(shaderProgram.samplerUniform, [0,1,2,3,4,5,6]);
 
 
         gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, vertexIndexBuffer);

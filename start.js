@@ -22,6 +22,7 @@ var Settings = function() {
     this.speed = .8;
     this.image = 'turbine';
     this.drawingStyle = 0;
+    this['Drag image to rotate'] = function() {};
 };
 var settings = new Settings();
 var gui = new dat.GUI();
@@ -451,4 +452,5 @@ $(function() {
     gui.add(settings, 'speed', -5, 5);
     gui.add(settings, 'image', ['bunny', 'dragon', 'happy', 'sphere', 'spider', 'turbine', 'dolphins']);
     gui.add(settings, 'drawingStyle', {'drawing': 0, 'drawing no rotation': 1, 'illuination': 2});
+    gui.add(settings, "Drag image to rotate");
 });

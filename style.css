@@ -14,3 +14,8 @@ body {
 canvas {
     margin-top: 5%;
 }
+
+html {
+    margin: 0;
+    height: 100%;
+}

@@ -20,7 +20,7 @@ mat4.identity(masterRotMat);
 var Settings = function() {
     this['Orbit Light'] = false;
     this.speed = .8;
-    this.image = 'bunny';
+    this.image = 'turbine';
     this.drawingStyle = 0;
 };
 var settings = new Settings();
